@@ -1,0 +1,20 @@
+{% extends "base.html" %}
+
+{% block pageheading %}Admin{% endblock %}
+
+{% block main %}
+<h3>Category Admin</h3>
+    <h4>Add a Category</h4>
+<form class="myform" method="post" action="/add_category">
+    <div class="form-group">
+        <div class="form-label"><label for ="Name">Category Name</label></div>
+        <div class="form-element"><input type="text" name="Name" id="Name" required></div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"></div>
+        <div class="form-element"><input type="submit" value="Add Categpry"></div>
+    </div>
+</form>
+    <h4>Delete a Category</h4>
+
+{% endblock %}

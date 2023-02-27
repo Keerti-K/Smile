@@ -3,6 +3,8 @@ import sqlite3
 from sqlite3 import Error
 from flask_bcrypt import Bcrypt
 
+
+
 DATABASE = "smilecafe.db"
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
@@ -50,6 +52,13 @@ def render_menu(cat_id):
 def render_contact():
     return render_template("contact.html", logged_in=is_logged_in())
 
+@app.route('/logout')
+def logout():
+    print(list(session.keys()))
+    [session.pop(key) for key in list(session.keys())]
+    print(list(session.keys()))
+    return redirect('/?message=See+you+next+time!')
+
 @app.route('/login', methods=['POST', 'GET'])
 def render_login():
     if is_logged_in():
@@ -66,6 +75,9 @@ def render_login():
         user_data = cur.fetchone()
         con.close()
         print(user_data)
+
+        if user_data is None:
+            return redirect("/login")
 
         try:
             user_id = user_data[0]
@@ -106,12 +118,13 @@ def render_signup():
         if len(password) < 8:
             return redirect("/signup?error=Password+must+be+at+least+8+characters")
 
+        hashed_password = bcrypt.generate_password_hash(password)
         con = open_database(DATABASE)
         query = "INSERT INTO user (first_name, last_name, email, password) VALUES (?, ?, ?, ?)"
         cur = con.cursor()
 
         try:
-            cur.execute(query, (first_name, last_name, email, password))
+            cur.execute(query, (first_name, last_name, email, hashed_password))
         except sqlite3.IntegrityError:
             con.close()
             return redirect("/signup?error=Email+is+already+in+use")
@@ -123,6 +136,25 @@ def render_signup():
 
     return render_template("signup.html", logged_in=is_logged_in())
 
+@app.route('/admin')
+def render_admin():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in')
+    return render_template("admin.html", logged_in=is_logged_in())
+
+@app.route('/add_category', methods=['POST'])
+def add_category():
+    if is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in')
+    if request.method == "POST" :
+        print(request.form)
+        first_name = request.form.get('first_name').title().strip()
+        con = open_database(DATABASE)
+        query = "INSERT INTO category (Name) VALUES (?)"
+        cur = con.cursor()
+        cur.execute(query, (Name, ))
+        con.close()
+        return redirect('/admin')
 
 if __name__ == '__main__':
     app.run()
