@@ -140,21 +140,42 @@ def render_signup():
 def render_admin():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in')
+    con = open_database(DATABASE)
+    query = "SELECT * FROM category"
+    cur = con.cursor
+    cur.execute(query)
+    category_list = cur.fetchall()
+    con.close()
     return render_template("admin.html", logged_in=is_logged_in())
 
 @app.route('/add_category', methods=['POST'])
 def add_category():
-    if is_logged_in():
+    if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in')
-    if request.method == "POST" :
+    if request.method == "POST":
         print(request.form)
-        first_name = request.form.get('first_name').title().strip()
+        cat_name = request.form.get('name').lower().strip()
+        print(cat_name)
         con = open_database(DATABASE)
         query = "INSERT INTO category (Name) VALUES (?)"
         cur = con.cursor()
         cur.execute(query, (Name, ))
+        con.commit()
         con.close()
         return redirect('/admin')
+
+
+@app.route('/delete_category', methods=['POST'])
+def render_delete_category():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in')
+    if request.method == "POST":
+        Category = request.form.get('cat_id')
+        print(Category)
+        cat_id = Category[0]
+        cat_name = Category[1]
+        return render_template("delete_confirm.html", cat_id=cat_id, cat_name=cat_name, type="Category")
+    return redirect("/admin")
 
 if __name__ == '__main__':
     app.run()

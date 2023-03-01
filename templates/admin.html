@@ -12,9 +12,25 @@
     </div>
     <div class="form-group">
         <div class="form-label"></div>
-        <div class="form-element"><input type="submit" value="Add Categpry"></div>
+        <div class="form-element"><input type="submit" value="Add Category"></div>
     </div>
 </form>
-    <h4>Delete a Category</h4>
+<h4>Delete a category</h4>
+<form class="myform" method="post" action="/delete_category">
+    <div class="form-group">
+        <div class="form-label"><label for ="Name">Category Name</label></div>
+        <div class="form-element">
+            <select id="cat_id" name="cat_id">
+                {% for category in categories %}
+                <option value="[{{ Category[0] }}, {{ Category[1] }} ]">{{ Category[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"></div>
+        <div class="form-element"><input type="submit" value="Delete Category"></div>
+    </div>
+</form>
 
 {% endblock %}
