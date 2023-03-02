@@ -22,7 +22,7 @@
         <div class="form-element">
             <select id="cat_id" name="cat_id">
                 {% for category in categories %}
-                <option value="[{{ Category[0] }}, {{ Category[1] }} ]">{{ Category[1] }}</option>
+                <option value="{{ category[0] }}, {{ category[1] }}">{{ category[1] }}</option>
                 {% endfor %}
             </select>
         </div>

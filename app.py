@@ -141,12 +141,12 @@ def render_admin():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in')
     con = open_database(DATABASE)
-    query = "SELECT * FROM category"
-    cur = con.cursor
+    query = "SELECT * FROM Category"
+    cur = con.cursor()
     cur.execute(query)
     category_list = cur.fetchall()
     con.close()
-    return render_template("admin.html", logged_in=is_logged_in())
+    return render_template("admin.html", logged_in=is_logged_in(), categories=category_list)
 
 @app.route('/add_category', methods=['POST'])
 def add_category():
@@ -154,7 +154,7 @@ def add_category():
         return redirect('/?message=Need+to+be+logged+in')
     if request.method == "POST":
         print(request.form)
-        cat_name = request.form.get('name').lower().strip()
+        cat_name = request.form.get('name').strip().lower()
         print(cat_name)
         con = open_database(DATABASE)
         query = "INSERT INTO category (Name) VALUES (?)"
