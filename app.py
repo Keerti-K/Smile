@@ -148,18 +148,22 @@ def render_admin():
     con.close()
     return render_template("admin.html", logged_in=is_logged_in(), categories=category_list)
 
+@app.errorhandler(404)
+def page_not_found(e):
+    return render_template('404.html'), 404
+
 @app.route('/add_category', methods=['POST'])
 def add_category():
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in')
     if request.method == "POST":
         print(request.form)
-        cat_name = request.form.get('name').strip().lower()
+        cat_name = request.form.get('Name').lower().strip()
         print(cat_name)
         con = open_database(DATABASE)
-        query = "INSERT INTO category (Name) VALUES (?)"
+        query = "INSERT INTO category ('Name') VALUES (?)"
         cur = con.cursor()
-        cur.execute(query, (Name, ))
+        cur.execute(query, (cat_name, ))
         con.commit()
         con.close()
         return redirect('/admin')
@@ -171,11 +175,22 @@ def render_delete_category():
         return redirect('/?message=Need+to+be+logged+in')
     if request.method == "POST":
         Category = request.form.get('cat_id')
+
         print(Category)
         cat_id = Category[0]
         cat_name = Category[1]
         return render_template("delete_confirm.html", cat_id=cat_id, cat_name=cat_name, type="Category")
     return redirect("/admin")
+
+@app.route('/delete_category_confirm/<cat_id>')
+def delete_category_confirm(cat_id):
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in')
+    con = open_database(DATABASE)
+    query = "DELETE FROM category WHERE id = ?"
+    cur = con.cursor()
+    cur.execute(query, (cat_id, ))
+    con.commit()
 
 if __name__ == '__main__':
     app.run()

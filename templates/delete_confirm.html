@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+
+{% block pageheading %}Confirm Delete{% endblock %}
+
+{% block main %}
+    <h3>Are you sure you want to delete {{ type }} {{ cat_name }}?
+        <a href="/delete_{{ type }}_confirm/{{ cat_id }}">Yes</a> /
+        <a href="/admin">No</a></h3>
+{% endblock %}
