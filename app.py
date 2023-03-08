@@ -175,25 +175,23 @@ def render_delete_category():
         return redirect('/?message=Need+to+be+logged+in')
     if request.method == "POST":
         Category = request.form.get('cat_id')
-
         print(Category)
         cat_id = Category[0]
         cat_name = Category[1]
         return render_template("delete_confirm.html", cat_id=cat_id, cat_name=cat_name, type="Category")
     return redirect("/admin")
 
-@app.route('/delete_category_confirm/<cat_id>')
+@app.route('/delete_Category_confirm/<cat_id>')
 def delete_category_confirm(cat_id):
     if not is_logged_in():
         return redirect('/?message=Need+to+be+logged+in')
     con = open_database(DATABASE)
-    query = "DELETE FROM category WHERE id = ?"
+    query = "DELETE FROM Category WHERE id = ?"
     cur = con.cursor()
     cur.execute(query, (cat_id, ))
     con.commit()
-
-if __name__ == '__main__':
-    app.run()
+    con.close()
+    return redirect("/admin")
 
 
 if __name__ == '__main__':
