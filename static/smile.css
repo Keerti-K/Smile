@@ -39,6 +39,14 @@ h2 {
     margin: 0 0 0.5rem 0;
 }
 
+h3, h4 {
+    text-align: center;
+    margin:2rem 0 0.5rem 0;
+}
+
+
+
+
 nav {
     background-color: rgba(44, 62, 80, 1.0); /* darkest blue */
     text-align: center;
@@ -134,9 +142,10 @@ a, a:visited {
 
 .category-menu ul {
     list-style-type: none;
-    font-size:1cm;
+    font-size:2cm;
     text-align:center;
 }
+
 
 .category-item {
     display: inline;
@@ -145,7 +154,7 @@ a, a:visited {
 
 .category-item a{
     color: rgba(52, 152, 219, 1.0);
-    text-align: center;
+
 }
 
 

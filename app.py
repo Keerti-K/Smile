@@ -161,7 +161,7 @@ def add_category():
         cat_name = request.form.get('Name').lower().strip()
         print(cat_name)
         con = open_database(DATABASE)
-        query = "INSERT INTO category ('Name') VALUES (?)"
+        query = "INSERT INTO Category ('Name') VALUES (?)"
         cur = con.cursor()
         cur.execute(query, (cat_name, ))
         con.commit()

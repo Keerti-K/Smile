@@ -5,9 +5,7 @@ menu
 {% endblock %}
 
 {% block main %}
-
-<div class="products">
-    <div class="category-menu">
+<div class="category-menu">
         <ul>
             {% for category in categories %}
             <li class="category-item">
@@ -16,6 +14,8 @@ menu
             {% endfor %}
         </ul>
     </div>
+<div class="products">
+
     {% for product in products %}
     <div class="product-box">
         <div class="product-box-heading"><h2>{{ product[1] }}</h2></div>
