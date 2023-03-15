@@ -34,6 +34,42 @@
 </form>
 
 <h3>Item Admin</h3>
-<h4>Add an Item</h4>
 
+<h4>Add an Item</h4>
+<form class="myform" method="post" action="/add_item">
+    <div class="form-group">
+        <div class="form-label"><label for ="Product_name">Item name</label></div>
+        <div class="form-element"><input type="text" name="Product_name" id="Name" required></div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"><label for ="Product_description">Item description</label></div>
+        <div class="form-element"><input type="text" name="Product_description" id="Product_description" required></div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"><label for ="Product_size">Item size(ml)</label></div>
+        <div class="form-element"><input type="text" name="Product_size" id="Product_size" required></div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"><label for ="Product_image">Item image</label></div>
+        <div class="form-element"><input type="text" name="Product_image" id="Product_image" required></div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"><label for ="Product_price">Item Price ($)</label></div>
+        <div class="form-element"><input type="text" name="Product_price" id="Product_price" required></div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"><label for ="Name">Category Name</label></div>
+        <div class="form-element">
+            <select id="cat_id" name="cat_id">
+                {% for category in categories %}
+                <option value="{{ category[0] }}, {{ category[1] }}">{{ category[1] }}</option>
+                {% endfor %}
+            </select>
+        </div>
+    </div>
+    <div class="form-group">
+        <div class="form-label"></div>
+        <div class="form-element"><input type="submit" value="Add Item"></div>
+    </div>
+</form>
 {% endblock %}

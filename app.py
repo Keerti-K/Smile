@@ -4,11 +4,11 @@ from sqlite3 import Error
 from flask_bcrypt import Bcrypt
 
 
-
 DATABASE = "smilecafe.db"
 app = Flask(__name__)
 bcrypt = Bcrypt(app)
 app.secret_key = "anything"
+
 
 def open_database(db_name):
     try:
@@ -17,6 +17,7 @@ def open_database(db_name):
     except Error as e:
         print(e)
         return None
+
 
 def is_logged_in():
     if session.get("email") is None:
@@ -27,6 +28,14 @@ def is_logged_in():
         return True
 
 
+def is_ordering():
+    if session.get('order') is None:
+        print("not ordering")
+    else:
+        print("ordering")
+        return False
+
+
 @app.route('/')
 def render_home():
     return render_template("home.html", logged_in=is_logged_in())
@@ -34,6 +43,9 @@ def render_home():
 
 @app.route('/menu/<cat_id>')
 def render_menu(cat_id):
+    order_start = request.args.get('order')
+    if order_start == 'start':
+        session['order'] = []
     con = open_database(DATABASE)
     query = "SELECT * FROM Category"
     cur = con.cursor()
@@ -45,12 +57,14 @@ def render_menu(cat_id):
     cur.execute(query, (cat_id, ))
     product_list = cur.fetchall()
     con.close()
-    return render_template("menu.html", categories=category_list, products=product_list, logged_in=is_logged_in())
+    return render_template("menu.html", categories=category_list, products=product_list, logged_in=is_logged_in(),
+                           ordering=is_ordering())
 
 
 @app.route('/contact')
 def render_contact():
     return render_template("contact.html", logged_in=is_logged_in())
+
 
 @app.route('/logout')
 def logout():
@@ -59,13 +73,14 @@ def logout():
     print(list(session.keys()))
     return redirect('/?message=See+you+next+time!')
 
+
 @app.route('/login', methods=['POST', 'GET'])
 def render_login():
     if is_logged_in():
         return redirect('/')
     print("Logging in")
     if request.method == "POST":
-        email =request.form['email'].strip().lower()
+        email = request.form['email'].strip().lower()
         password = request.form['password'].strip()
         print(email)
         query = """SELECT id, first_name, password FROM user WHERE email = ?"""
@@ -97,7 +112,6 @@ def render_login():
         return redirect('/')
 
     return render_template("login.html", logged_in=is_logged_in())
-
 
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -136,6 +150,7 @@ def render_signup():
 
     return render_template("signup.html", logged_in=is_logged_in())
 
+
 @app.route('/admin')
 def render_admin():
     if not is_logged_in():
@@ -148,9 +163,11 @@ def render_admin():
     con.close()
     return render_template("admin.html", logged_in=is_logged_in(), categories=category_list)
 
+
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
 
 @app.route('/add_category', methods=['POST'])
 def add_category():
@@ -166,7 +183,32 @@ def add_category():
         cur.execute(query, (cat_name, ))
         con.commit()
         con.close()
-        return redirect('/admin')
+    return redirect('/admin')
+
+
+@app.route('/add_item', methods=['POST'])
+def add_item():
+    if not is_logged_in():
+        return redirect('/?message=Need+to+be+logged+in')
+    if request.method == "POST":
+        print(request.form)
+        item_name = request.form.get('Product_name').strip()
+        item_description = request.form.get('Product_description').strip()
+        item_size = request.form.get('Product_size').strip()
+        item_image = request.form.get('Product_image').lower().strip()
+        item_price = request.form.get('Product_price').strip()
+        cat_id = request.form.get('cat_id')
+        cat_id = cat_id.split(", ")
+        cat_id = cat_id[0]
+        con = open_database(DATABASE)
+        query = "INSERT INTO Product ('Product_name', 'Product_description', 'Product_size', 'Product_image'," \
+                " 'Product_price', 'cat_id') VALUES (?, ?, ?, ?, ?, ?)"
+        cur = con.cursor()
+        cur.execute(query, (item_name, item_description, item_size, item_image, item_price, cat_id))
+        con.commit()
+        con.close()
+    return redirect('/admin')
+
 
 
 @app.route('/delete_category', methods=['POST'])
@@ -180,6 +222,8 @@ def render_delete_category():
         cat_name = Category[1]
         return render_template("delete_confirm.html", cat_id=cat_id, cat_name=cat_name, type="Category")
     return redirect("/admin")
+
+
 
 @app.route('/delete_Category_confirm/<cat_id>')
 def delete_category_confirm(cat_id):
