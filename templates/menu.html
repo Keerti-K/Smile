@@ -23,7 +23,11 @@ menu
         <div class="product-box-info">{{ product[2] }}</div>
         <div class="product-box-info"><strong>Size:</strong>{{ product[3] }}</div>
         <div class="product-box-info"><strong>Price:</strong>${{ product[5] }}</div>
+        {% if ordering %}
+        <div class="product-box-info"><a href="/add_to_cart/{{ product[0]}}">Add to Cart</a></div>
+        {% endif %}
     </div>
     {% endfor %}
 </div>
+
 {% endblock %}

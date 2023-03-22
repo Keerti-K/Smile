@@ -31,9 +31,10 @@ def is_logged_in():
 def is_ordering():
     if session.get('order') is None:
         print("not ordering")
+        return False
     else:
         print("ordering")
-        return False
+        return True
 
 
 @app.route('/')
@@ -41,24 +42,57 @@ def render_home():
     return render_template("home.html", logged_in=is_logged_in())
 
 
-@app.route('/menu/<cat_id>')
+@app.route('/menu/<cat_id>', methods=['POST', 'GET'])
 def render_menu(cat_id):
     order_start = request.args.get('order')
-    if order_start == 'start':
+    if order_start == 'start' and not is_ordering():
         session['order'] = []
+
+    if request.method == "POST":
+        print(request.form)
+        order = []
+
     con = open_database(DATABASE)
     query = "SELECT * FROM Category"
     cur = con.cursor()
     cur.execute(query)
     category_list = cur.fetchall()
-    print(category_list)
     query = "SELECT * FROM Product WHERE cat_id = ? ORDER BY Product_name "
     cur = con.cursor()
     cur.execute(query, (cat_id, ))
     product_list = cur.fetchall()
     con.close()
-    return render_template("menu.html", categories=category_list, products=product_list, logged_in=is_logged_in(),
-                           ordering=is_ordering())
+    return render_template("menu.html", categories=category_list, ordering=is_ordering(), products=product_list,
+                           logged_in=is_logged_in())
+
+
+@app.route('/add_to_cart/<product_id>')
+def add_to_cart(product_id):
+    try:
+        product_id = int(product_id)
+    except ValueError:
+        print("{} is not an integer".format(product_id))
+        return redirect("/menu/1?error=Invalid+product+id")
+    print("Adding to cart product", product_id)
+    order = session['order']
+    print("Order before adding", order)
+    order.append(product_id)
+    print("Order after adding", order)
+    session['order'] = order
+    return redirect(request.referrer)
+
+
+@app.route('/cart', methods=['POST', 'GET'])
+def render_cart():
+    if request.method == "POST":
+        name = request.form[Name]
+        print(name)
+        put_data("INSERT INTO orders")
+
+
+
+
+
 
 
 @app.route('/contact')
@@ -167,6 +201,11 @@ def render_admin():
 @app.errorhandler(404)
 def page_not_found(e):
     return render_template('404.html'), 404
+
+
+@app.errorhandler(500)
+def page_not_found(e):
+    return render_template('500.html'), 500
 
 
 @app.route('/add_category', methods=['POST'])

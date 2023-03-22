@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block pageheading %}Cart{% endblock %}
+
+{% block main %}
+<table>
+    <tr>
+        <th>Item</th>
+        <th class="number">Quantity</th>
+        <th class="number">Each</th>
+        <th class="number">Total</th>
+    </tr>
+    {% for product in products %}
+    <tr>
+        <td>{{ product[2] }}</td>
+        <td class="number">{{ product[1] }}</td>
+        <td class="number">${{ product[3] }}</td>
+        <td class="number">${{ product[4] }}</td>
+    </tr>
+    {% endfor %}
+    <tr>
+        <td colspan="4" class="number"><strong>Total ${{ total }}</strong></td>
+    </tr>
+</table>
+
+{% endblock %}
