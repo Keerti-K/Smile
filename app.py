@@ -37,9 +37,49 @@ def is_ordering():
         return True
 
 
+def get_list(query, params):
+    con = open_database(DATABASE)
+    cur = con.cursor()
+    if params == "":
+        cur.execute(query)
+    else:
+        cur.execute(query, params)
+    query_list = cur.fetchall()
+    con.close()
+    return query_list
+
+
+def put_data(query, params):
+    con = open_database(DATABASE)
+    cur = con.cursor()
+    cur.execute(query, params)
+    con.commit()
+    con.close()
+
+
+def summarise_orders():
+    order = session['order']
+    print(order)
+    order.sort()
+    print(order)
+    order_summary = []
+    last_order = -1
+    for item in order:
+        if item != last_order:
+            order_summary.append([item, 1])
+            last_order = item
+        else:
+            order_summary[-1][1] += 1
+    print(order_summary)
+    return order_summary
+
+
 @app.route('/')
 def render_home():
-    return render_template("home.html", logged_in=is_logged_in())
+    message = request.args.get('message')
+    if message is None:
+        message = ""
+    return render_template("home.html", logged_in=is_logged_in(), message=message, ordering=is_ordering())
 
 
 @app.route('/menu/<cat_id>', methods=['POST', 'GET'])
@@ -52,16 +92,12 @@ def render_menu(cat_id):
         print(request.form)
         order = []
 
-    con = open_database(DATABASE)
-    query = "SELECT * FROM Category"
-    cur = con.cursor()
-    cur.execute(query)
-    category_list = cur.fetchall()
-    query = "SELECT * FROM Product WHERE cat_id = ? ORDER BY Product_name "
-    cur = con.cursor()
-    cur.execute(query, (cat_id, ))
-    product_list = cur.fetchall()
-    con.close()
+    # Fetch the categories
+    category_list = get_list("SELECT * FROM Category", "")
+
+    # Fetch the products
+    product_list = get_list("SELECT * FROM Product WHERE cat_id = ? ORDER BY Name", (cat_id, ))
+
     return render_template("menu.html", categories=category_list, ordering=is_ordering(), products=product_list,
                            logged_in=is_logged_in())
 
@@ -85,14 +121,31 @@ def add_to_cart(product_id):
 @app.route('/cart', methods=['POST', 'GET'])
 def render_cart():
     if request.method == "POST":
-        name = request.form[Name]
+        name = request.form['name']
         print(name)
-        put_data("INSERT INTO orders")
-
-
-
-
-
+        put_data("INSERT INTO orders VALUES (null, ?, TIME('now'), ?)", (name, 1))
+        order_number = get_list("SELECT max(id) FROM orders WHERE name = ?", (name, ))
+        print(order_number)
+        order_number = order_number[0][0]
+        orders = summarise_orders()
+        for order in orders:
+            put_data("INSERT INTO  order_content VALUES (null, ?, ?, ?)", (order_number, order[0], order[1]))
+        session.pop('order')
+        return redirect('/?message=Order+has+not+been+placed+under+the+name+' + name)
+    else:
+        orders = summarise_orders()
+        total = 0
+        for item in orders:
+            item_detail = get_list("SELECT Product_name, Product_price FROM Product WHERE id = ?", (item[0], ))
+            print(item_detail)
+            if item_detail:
+                item.append(item_detail[0][0])
+                item.append(item_detail[0][1])
+                item.append(item_detail[0][1] * item[1])
+                total += item_detail[0][1] * item[1]
+        print(orders)
+        return render_template("cart.html", logged_in=is_logged_in(), ordering=is_ordering(),
+                               products=orders, total=total)
 
 
 @app.route('/contact')
